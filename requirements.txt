@@ -1,0 +1,34 @@
+# VideOCRplus - Runtime Dependencies
+# Python >= 3.9
+
+# Video processing
+av
+numpy
+Pillow
+
+# OCR and text processing
+Fast-SSIM
+cpuid
+opencc
+thefuzz
+wordninja-enhanced
+
+# GUI
+PySimpleGUI
+psutil
+wakepy
+
+# Archive extraction (fallback if 7z not in PATH)
+py7zr
+
+# Windows only
+PyTaskbarProgress @ git+https://github.com/timminator/PyTaskbar.git ; sys_platform == 'win32'
+winotify ; sys_platform == 'win32'
+
+# Linux only
+plyer ; sys_platform != 'win32'
+
+# Build (optional, for compiling with Nuitka)
+# nuitka
+# patchelf ; sys_platform == 'linux'
+# requests

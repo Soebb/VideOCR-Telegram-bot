@@ -1,0 +1,82 @@
+[build-system]
+requires = ["setuptools>=77.0.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "VideOCRplus"
+dynamic = ["version"]
+description = "Extract hardcoded subtitles from videos via a simple GUI using machine learning."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+keywords = ["machine-learning", "ocr", "deep-learning", "subtitles", "hardsub"]
+authors = [{name = "Tim Lodemann"}]
+requires-python = ">=3.9"
+classifiers = [
+    "Intended Audience :: Developers",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+]
+dependencies = [
+    "av",
+    "cpuid",
+    "Fast-SSIM",
+    "opencc",
+    "Pillow",
+    "psutil",
+    "PySimpleGUI",
+    "thefuzz",
+    "wakepy",
+    "wordninja-enhanced",
+    "PyTaskbarProgress @ git+https://github.com/timminator/PyTaskbar.git ; sys_platform == 'win32'",
+    "winotify ; sys_platform == 'win32'",
+    "plyer ; sys_platform != 'win32'",
+]
+
+[dependency-groups]
+dev = [
+    "mypy",
+    "pre-commit",
+    "ruff",
+]
+build = [
+    "nuitka",
+    "patchelf; sys_platform == 'linux'",
+    "requests",
+]
+all = [
+    { include-group = "dev" },
+    { include-group = "build" },
+]
+
+[project.urls]
+Homepage = "https://github.com/kiriya55/VideOCRplus"
+documentation = "https://github.com/kiriya55/VideOCRplus/blob/main/README.md"
+Repository = "https://github.com/kiriya55/VideOCRplus.git"
+Issues = "https://github.com/kiriya55/VideOCRplus/issues"
+
+[tool.mypy]
+strict = true
+exclude = [
+    "gui\\.build",
+    "cli\\.build"
+]
+
+[tool.setuptools]
+packages = []
+
+[tool.setuptools.dynamic]
+version = { attr = "_version.__version__" }
+
+[tool.ruff]
+exclude = ["build", "venv", ".venv", "__pycache__"]
+preview = true
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "W"]
+ignore = ["E501", "SIM108", "SIM102", "SIM114"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["videocr"]

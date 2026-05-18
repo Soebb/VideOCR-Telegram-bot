@@ -1,0 +1,28 @@
+# Pycache
+__pycache__/
+.plugin_cache
+
+# Config file
+videocr_gui_config.ini
+
+# Distribution / SCM
+*.egg-info/
+/Releases/
+/gui.dist/
+/cli.dist/
+/PaddleOCR*
+/Chrome-Lens-OCR*
+/videocr-cli*/
+
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+
+# AI
+
+.claude
+claude/
