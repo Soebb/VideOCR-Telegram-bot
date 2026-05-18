@@ -1,4 +1,4 @@
-# VideOCRplus - Runtime Dependencies
+# Runtime Dependencies
 # Python >= 3.9
 
 # Video processing
@@ -13,22 +13,10 @@ opencc
 thefuzz
 wordninja-enhanced
 
-# GUI
-PySimpleGUI
-psutil
-wakepy
+# Telegram side
+pyrogram
+tgcrypto
+python-dotenv
 
 # Archive extraction (fallback if 7z not in PATH)
 py7zr
-
-# Windows only
-PyTaskbarProgress @ git+https://github.com/timminator/PyTaskbar.git ; sys_platform == 'win32'
-winotify ; sys_platform == 'win32'
-
-# Linux only
-plyer ; sys_platform != 'win32'
-
-# Build (optional, for compiling with Nuitka)
-# nuitka
-# patchelf ; sys_platform == 'linux'
-# requests
