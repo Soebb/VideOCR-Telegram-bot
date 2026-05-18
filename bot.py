@@ -28,6 +28,9 @@ START_BTN = InlineKeyboardMarkup(
     )
 
 
+OCR_ENGINE = "google_lens" # or "paddleocr"
+LANGUAGE = "fa"
+
 @Bot.on_message(filters.command(["start"]))
 async def start(bot, update):
     text = START_TXT.format(update.from_user.mention)
@@ -44,15 +47,14 @@ async def from_tg_files(_, m):
     if m.document and not m.document.mime_type.startswith("video/"):
         return
     msg = await m.reply("Downloading..")
-    media = await m.download()
+    vid = await m.download()
     await msg.edit_text("Processing..")
-    subs = subs_ai.transcribe(media, model)
     output_name = "out.srt"
-    subs.save(output_name)
+    save_subtitles_to_file(vid, output_name, OCR_ENGINE, LANGUAGE)
     await m.reply_document(output_name)
     await msg.delete()
     os.remove(output_name)
-    os.remove(media)
+    os.remove(vid)
 
 
 Bot.run()
