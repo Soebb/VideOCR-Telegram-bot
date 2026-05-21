@@ -1,17 +1,18 @@
 from videocr import save_subtitles_to_file
 import os
-from dotenv import load_dotenv
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 
-load_dotenv()
+BOT_TOKEN = os.environ.get("BOT_TOKEN")
+API_ID = os.environ.get("API_ID")
+API_HASH = os.environ.get("API_HASH")
 
 Bot = Client(
     "videocrBot",
-    bot_token = os.environ["BOT_TOKEN"],
-    api_id = int(os.environ["API_ID"]),
-    api_hash = os.environ["API_HASH"]
+    bot_token = BOT_TOKEN,
+    api_id = API_ID,
+    api_hash = API_HASH
 )
 
 
