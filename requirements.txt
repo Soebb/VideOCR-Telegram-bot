@@ -1,4 +1,3 @@
-# Runtime Dependencies
 # Python >= 3.9
 
 # Video processing
@@ -16,7 +15,6 @@ wordninja-enhanced
 # Telegram side
 pyrogram
 tgcrypto
-python-dotenv
 
 # Archive extraction (fallback if 7z not in PATH)
 py7zr
