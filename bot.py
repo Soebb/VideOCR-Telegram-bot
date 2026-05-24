@@ -19,7 +19,7 @@ Bot = Client(
 START_TXT = """
 Hi {}, I'm videocr Bot.
 
-Send a video with hard-coded subtitle to extract it in a srt file.
+Send a video with hard-coded subtitle to get an external srt file.
 """
 
 START_BTN = InlineKeyboardMarkup(
