@@ -641,8 +641,9 @@ class Video:
                             h, w = img.shape[:2]
                             canvas[y:y + h, x:x + w] = img
 
-                        Image.fromarray(canvas).save(frame_path, quality=80)
-
+                        jpeg_bytes = simplejpeg.encode_jpeg(canvas, quality=80, colorspace='RGB')
+                        with open(frame_path, 'wb') as f:
+                            f.write(jpeg_bytes)
                 except Exception as e:
                     error_list.append(e)
                     stop_event.set()
