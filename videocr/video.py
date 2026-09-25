@@ -12,10 +12,10 @@ import threading
 from typing import Any, cast
 
 import av
-import fast_ssim  # type: ignore
+import fast_ssim
 import numpy as np
-import wordninja_enhanced as wordninja  # type: ignore
-from PIL import Image
+import wordninja_enhanced as wordninja
+import simplejpeg  # type: ignore
 
 from . import llm_vision, utils
 from .config import DetectionConfig, FrameConfig, LlmConfig, OcrConfig, PostProcessConfig, TimeRange
@@ -322,7 +322,8 @@ class Video:
                     if llm_vision._DEBUG_ENABLED:
                         llm_vision._debug_log(f"Starting grid: {os.path.basename(grid_path)}, exists={os.path.exists(grid_path)}")
 
-                    grid_img = np.array(Image.open(grid_path))
+                    with open(grid_path, 'rb') as f:
+                        grid_img = simplejpeg.decode_jpeg(f.read(), colorspace='RGB')
                     zone_idx = grid_info["zone_idx"]
                     is_rep = grid_info.get("is_representative", False)
                     frame_indices = grid_info["frame_indices"]
