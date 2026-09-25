@@ -11,7 +11,7 @@ import urllib.request
 from typing import Any
 
 import numpy as np
-from PIL import Image
+import simplejpeg  # type: ignore
 
 _DEBUG_ENABLED = os.environ.get("VIDEOCR_LLM_DEBUG", "") == "1"
 _LLM_LOG_PATH = os.path.join(tempfile.gettempdir(), "videocr_llm_debug.log")
@@ -40,10 +40,9 @@ Return ONLY valid JSON (no markdown, no explanation):
 
 def encode_image_base64(img_array: np.ndarray, quality: int = 75) -> str:
     """Encode a numpy RGB image array as base64 JPEG string."""
-    img = Image.fromarray(img_array)
-    buf = io.BytesIO()
-    img.save(buf, format='JPEG', quality=quality)
-    return base64.b64encode(buf.getvalue()).decode('utf-8')
+    img_bytes = simplejpeg.encode_jpeg(img_array, quality=quality, colorspace='RGB')
+    buf = io.BytesIO(img_bytes)
+    return base64.b64encode(buf).decode('utf-8')
 
 
 def build_grid_image(frames: list[np.ndarray], max_width: int = 1920, spacing: int = 4) -> np.ndarray:
