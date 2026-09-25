@@ -10,7 +10,8 @@ from collections.abc import Iterator
 from typing import IO, Any
 
 import av
-import fast_ssim  # type: ignore
+import fast_ssim
+import simplejpeg type: ignore
 import numpy as np
 from cpuid import cpuid, xgetbv  # type: ignore
 from PIL import Image
@@ -625,7 +626,8 @@ def are_rect_lists_similar(rects1: list[list[float]], rects2: list[list[float]],
 
 def load_grid(g_file: str) -> tuple[str, Any]:
     """Loads a grid image."""
-    return g_file, np.array(Image.open(g_file))
+    with open(g_file, 'rb') as f:
+        return g_file, simplejpeg.decode_jpeg(f.read(), colorspace='RGB')
 
 
 def _iter_ssim_batches(
