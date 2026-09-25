@@ -3,7 +3,7 @@
 # Video processing
 av
 numpy
-Pillow
+simplejpeg
 
 # OCR and text processing
 Fast-SSIM
