@@ -1092,7 +1092,9 @@ class Video:
                     filename = f"llm_grid_{llm_grid_counter:0{FILENAME_ZERO_PADDING}d}.jpg"
                     filepath = os.path.join(llm_grids_dir, filename)
                     # Write directly to disk — don't use write_queue (writer threads may have exited)
-                    Image.fromarray(grid).save(filepath, quality=80)
+                    jpeg_bytes = simplejpeg.encode_jpeg(grid, quality=80, colorspace='RGB')
+                    with open(filepath, 'wb') as f:
+                        f.write(jpeg_bytes)
                     llm_grids.append({
                         "path": filepath,
                         "frame_indices": chunk_batch_indices,  # list of lists
