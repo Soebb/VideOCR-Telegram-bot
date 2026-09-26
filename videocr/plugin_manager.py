@@ -8,6 +8,7 @@ import shutil
 import subprocess
 import sys
 import tarfile
+import py7zip
 import tempfile
 import threading
 import time
@@ -60,8 +61,8 @@ def _get_asset_patterns(plugin_key: str) -> list[str]:
     Patterns are ordered by preference (archives first, then installers)."""
     patterns: dict[str, dict[str, list[str]]] = {
         "paddleocr_models": {
-            "win32": ["PaddleOCR.PP-OCRv5.support.files.VideOCR.7z"],
-            "linux": ["PaddleOCR.PP-OCRv5.support.files.VideOCR.tar.xz"],
+            "win32": ["PaddleOCR.PP-OCRv6.support.files.VideOCR.7z"],
+            "linux": ["PaddleOCR.PP-OCRv6.support.files.VideOCR.tar.xz"],
         },
         "paddleocr_cpu": {
             # Prefer .7z archives over .exe installers
@@ -90,11 +91,11 @@ PLUGIN_REGISTRY: dict[str, dict[str, Any]] = {
     "paddleocr_models": {
         "repo": "timminator/PaddleOCR-Standalone",
         "display_name": "PaddleOCR Detection + Recognition Models",
-        "description": "PP-OCRv5 text detection and recognition models. Required for all engines (Phase 2 detection).",
+        "description": "PP-OCRv6 text detection and recognition models. Required for all engines (Phase 2 detection).",
         "extract_to": ".",
         "required_for": ["paddleocr", "google_lens", "llm_vision"],
-        "check_path": "PaddleOCR.PP-OCRv5.support.files",
-        "estimated_size_mb": 250,
+        "check_path": "PaddleOCR.PP-OCRv6.support.files",
+        "estimated_size_mb": 280,
     },
     "paddleocr_cpu": {
         "repo": "timminator/PaddleOCR-Standalone",
@@ -309,7 +310,8 @@ def extract_archive(archive_path: str, dest_dir: str) -> None:
 
     try:
         if lower.endswith(".7z"):
-            _extract_7z(archive_path, dest_dir)
+            z = py7zip.Py7zip()
+            z.decompress(archive_path, dest_dir)
         elif lower.endswith(".tar.xz") or lower.endswith(".tar.gz"):
             with tarfile.open(archive_path) as tf:
                 tf.extractall(dest_dir, filter="data")
@@ -329,62 +331,6 @@ def extract_archive(archive_path: str, dest_dir: str) -> None:
     except Exception as e:
         # Re-raise with more context
         raise RuntimeError(f"Failed to extract '{os.path.basename(archive_path)}': {e}") from e
-
-
-def is_7z_available() -> bool:
-    """Check if 7z or 7za is available in PATH."""
-    import shutil as _shutil
-    return _shutil.which("7z") is not None or _shutil.which("7za") is not None
-
-
-def _extract_7z(archive_path: str, dest_dir: str) -> None:
-    """Extract a .7z file using 7z, 7za, or py7zr (pure Python fallback)."""
-    import shutil as _shutil
-
-    # Try 7z first, then 7za
-    last_error = ""
-    found_cmd = False
-    for cmd in ["7z", "7za"]:
-        if _shutil.which(cmd) is None:
-            last_error = f"'{cmd}' not found in PATH"
-            continue
-        found_cmd = True
-        try:
-            result = subprocess.run(
-                [cmd, "x", "-y", f"-o{dest_dir}", archive_path],
-                capture_output=True, text=True, check=True,
-            )
-            return
-        except subprocess.CalledProcessError as e:
-            last_error = f"'{cmd}' failed with exit code {e.returncode}"
-            if e.stderr:
-                last_error += f": {e.stderr.strip()[:200]}"
-            elif e.stdout:
-                last_error += f": {e.stdout.strip()[:200]}"
-            continue
-
-    # Fallback: try py7zr (pure Python)
-    try:
-        import py7zr
-        os.makedirs(dest_dir, exist_ok=True)
-        with py7zr.SevenZipFile(archive_path, mode='r') as z:
-            z.extractall(dest_dir)
-        return
-    except ImportError as e:
-        import sys
-        last_error = f"py7zr not available ({e}). Python: {sys.executable}"
-    except Exception as e:
-        last_error = f"py7zr extraction failed: {e}"
-
-    if not found_cmd:
-        import sys
-        raise RuntimeError(
-            f"7-Zip not found and py7zr not available.\n"
-            f"Python executable: {sys.executable}\n"
-            f"Install 7-Zip (https://7-zip.org) or run:\n"
-            f"\"{sys.executable}\" -m pip install py7zr"
-        )
-    raise RuntimeError(f"Extraction failed: {last_error}")
 
 
 # ─── High-level Operations ──────────────────────────────────────────────────
@@ -496,25 +442,6 @@ class PluginDownloadTask:
     def cancel(self) -> None:
         """Cancel the download."""
         self.cancel_event.set()
-
-
-def check_extraction_capability() -> tuple[bool, str]:
-    """Check if we can extract .7z archives. Returns (can_extract, message)."""
-    import shutil as _shutil
-    if _shutil.which("7z") is not None or _shutil.which("7za") is not None:
-        return True, "7-Zip found"
-    try:
-        import py7zr
-        return True, "py7zr available"
-    except ImportError as e:
-        import sys
-        return False, (
-            f"py7zr import failed: {e}\n"
-            f"Python: {sys.executable}\n"
-            f"Install with: \"{sys.executable}\" -m pip install py7zr"
-        )
-    except Exception as e:
-        return False, f"py7zr error: {e}"
 
 
 def get_all_plugins_status(ocr_engine: str = "") -> list[dict[str, Any]]:
