@@ -16,5 +16,5 @@ wordninja-enhanced
 pyrogram
 tgcrypto
 
-# Archive extraction (fallback if 7z not in PATH)
-py7zr
+# Archive extraction
+py7zip
