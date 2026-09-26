@@ -17,4 +17,4 @@ pyrogram
 tgcrypto
 
 # Archive extraction
-py7zip
+https://github.com/aliasfoxkde/py7zip/archive/main.zip
