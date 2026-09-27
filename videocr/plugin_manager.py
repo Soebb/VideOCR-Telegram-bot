@@ -29,28 +29,6 @@ def get_cache_dir() -> str:
     return cache_dir
 
 
-def clear_cache() -> int:
-    """Clear all cached plugin archives. Returns number of files removed."""
-    cache_dir = get_cache_dir()
-    count = 0
-    for f in os.listdir(cache_dir):
-        fpath = os.path.join(cache_dir, f)
-        if os.path.isfile(fpath):
-            os.remove(fpath)
-            count += 1
-    return count
-
-
-def get_cache_size() -> int:
-    """Return total size of cached archives in bytes."""
-    cache_dir = get_cache_dir()
-    total = 0
-    for f in os.listdir(cache_dir):
-        fpath = os.path.join(cache_dir, f)
-        if os.path.isfile(fpath):
-            total += os.path.getsize(fpath)
-    return total
-
 IS_WINDOWS = sys.platform == "win32"
 IS_LINUX = sys.platform.startswith("linux")
 
