@@ -442,22 +442,3 @@ class PluginDownloadTask:
     def cancel(self) -> None:
         """Cancel the download."""
         self.cancel_event.set()
-
-
-def get_all_plugins_status(ocr_engine: str = "") -> list[dict[str, Any]]:
-    """Get status of all plugins, optionally filtered by engine requirement."""
-    result = []
-    for key, info in PLUGIN_REGISTRY.items():
-        status = check_plugin_status(key)
-        needed = ocr_engine in info["required_for"] if ocr_engine else False
-        result.append({
-            "key": key,
-            "display_name": info["display_name"],
-            "description": info["description"],
-            "estimated_size_mb": info["estimated_size_mb"],
-            "installed": status["installed"],
-            "version": status.get("version", ""),
-            "path": status.get("path", ""),
-            "needed_for_engine": needed,
-        })
-    return result
