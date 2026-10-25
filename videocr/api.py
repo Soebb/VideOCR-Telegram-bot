@@ -32,7 +32,8 @@ def save_subtitles_to_file(
         plugin_keys = [k for k, v in PLUGIN_REGISTRY.items() if engine_key in v["required_for"]]
         plugin_keys = [k for k in plugin_keys if not check_plugin_status(k)["installed"]]
         for key in plugin_keys:
-            PluginDownloadTask(key, use_proxy=use_proxy)
+            task = PluginDownloadTask(key, use_proxy=False)
+            task.run()
 
     # All engines need PaddleOCR executable for Phase 2 text detection
     paddleocr_path = utils.find_executable("paddleocr")
