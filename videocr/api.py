@@ -4,7 +4,6 @@ import sys
 
 from . import utils
 from .config import DetectionConfig, FrameConfig, LlmConfig, OcrConfig, PostProcessConfig, TimeRange
-from .plugin_manager import PLUGIN_REGISTRY, check_plugin_status, get_missing_plugins
 from .video import Video
 
 
@@ -25,16 +24,6 @@ def save_subtitles_to_file(
         subtitle_alignments = [None, None]
     elif len(subtitle_alignments) == 1:
         subtitle_alignments.append(None)
-
-    # Check required components for the selected engine
-    missing = get_missing_plugins(ocr_engine)
-    if missing:
-        names = [PLUGIN_REGISTRY[k]["display_name"] for k in missing]
-        print(f"Error: Missing required components for '{ocr_engine}':", flush=True)
-        for name in names:
-            print(f"  - {name}", flush=True)
-        print("Download them via the GUI Settings tab or from the GitHub releases.", flush=True)
-        sys.exit(1)
 
     # All engines need PaddleOCR executable for Phase 2 text detection
     paddleocr_path = utils.find_executable("paddleocr")
