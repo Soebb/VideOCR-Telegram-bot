@@ -83,6 +83,14 @@ async def start(bot, update):
     )
 
 
+def get_paddleocr_log_path() -> str:
+    """Return the log path used by VideOCR's log_error() on Linux."""
+    state_home = os.environ.get("XDG_STATE_HOME")
+    if not state_home:
+        state_home = os.path.join(os.path.expanduser("~"), ".local", "state")
+    return os.path.join(state_home, "VideOCR", "paddleocr_error.log")
+
+
 @Bot.on_message(filters.private & (filters.video | filters.document))
 async def from_tg_files(_, m):
     if m.document and not (m.document.mime_type or "").startswith("video/"):
@@ -96,6 +104,25 @@ async def from_tg_files(_, m):
     try:
         save_subtitles_to_file(vid, output_name, OCR_ENGINE, LANGUAGE)
         await m.reply_document(output_name)
+    except (Exception, SystemExit) as exc:
+        await m.reply_text(
+            f"Video processing failed: {type(exc).__name__}: {exc}\n"
+            "I'll send the PaddleOCR error log if it exists."
+        )
+        log_path = get_paddleocr_log_path()
+        if os.path.isfile(log_path):
+            try:
+                await m.reply_document(
+                    log_path,
+                    caption="PaddleOCR error log (paddleocr_error.log)"
+                )
+            except Exception as send_error:
+                await m.reply_text(f"Could not send the log file: {send_error}")
+        else:
+            await m.reply_text(
+                f"Log file was not found at: {log_path}\n"
+                "Please check the Render service logs for the full error."
+            )
     finally:
         if os.path.exists(output_name):
             os.remove(output_name)
