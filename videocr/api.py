@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import sys
-from .plugin_manager import PLUGIN_REGISTRY, get_missing_plugins, check_plugin_status, PluginDownloadTask
+from .plugin_manager import get_missing_plugins
 from . import utils
 from .config import DetectionConfig, FrameConfig, LlmConfig, OcrConfig, PostProcessConfig, TimeRange
 from .video import Video
@@ -25,15 +25,16 @@ def save_subtitles_to_file(
     elif len(subtitle_alignments) == 1:
         subtitle_alignments.append(None)
 
-# Check required components for the selected engine
+# Dependencies must be prepared before the application starts.
+    # Do not download large binaries while handling an incoming video.
     engine_key = ocr_engine
     missing = get_missing_plugins(engine_key)
     if missing:
-        plugin_keys = [k for k, v in PLUGIN_REGISTRY.items() if engine_key in v["required_for"]]
-        plugin_keys = [k for k in plugin_keys if not check_plugin_status(k)["installed"]]
-        for key in plugin_keys:
-            task = PluginDownloadTask(key, use_proxy=False)
-            task.run()
+        raise RuntimeError(
+            "Required OCR dependencies are not installed: "
+            + ", ".join(missing)
+            + ". Install them during application startup before processing videos."
+        )
 
     # All engines need PaddleOCR executable for Phase 2 text detection
     paddleocr_path = utils.find_executable("paddleocr")
