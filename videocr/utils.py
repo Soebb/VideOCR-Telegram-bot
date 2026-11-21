@@ -655,7 +655,8 @@ def _iter_ssim_batches(
         for rect in union_rects:
             cx1, cy1 = max(0, int(rect[0])), max(0, int(rect[1]))
             cx2, cy2 = min(w, int(rect[2])), min(h, int(rect[3]))
-            current_crops.append(img[cy1:cy2, cx1:cx2])
+            # fast_ssim requires C-contiguous arrays; sliced image crops are often strided views.
+            current_crops.append(img[cy1:cy2, cx1:cx2].copy(order="C"))
 
         item_dict: dict[str, Any] = {
             "img": img.copy(),
