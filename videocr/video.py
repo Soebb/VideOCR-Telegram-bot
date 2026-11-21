@@ -613,6 +613,10 @@ class Video:
                                 else:
                                     raise ValueError(f"Invalid subtitle_position: {subtitle_position}")
 
+                                # Cropped NumPy views are often non-C-contiguous;
+                                # fast_ssim requires contiguous input arrays.
+                                sample = np.ascontiguousarray(sample)
+
                             images_to_process.append({
                                 'zone_idx': zone_idx,
                                 'img': img,
