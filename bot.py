@@ -1,6 +1,7 @@
 from videocr import save_subtitles_to_file
 from videocr.plugin_manager import PLUGIN_REGISTRY, PluginDownloadTask, check_plugin_status, get_missing_plugins
 import os
+import traceback
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
@@ -108,24 +109,41 @@ async def from_tg_files(_, m):
         save_subtitles_to_file(vid, output_name, OCR_ENGINE, LANGUAGE)
         await m.reply_document(output_name)
     except (Exception, SystemExit) as exc:
+        # Always preserve the Python traceback, including failures outside the
+        # PaddleOCR subprocess (for example JSON parsing or post-processing).
+        state_home = os.environ.get("XDG_STATE_HOME") or os.path.join(os.path.expanduser("~"), ".local", "state")
+        log_dir = os.path.join(state_home, "VideOCR")
+        os.makedirs(log_dir, exist_ok=True)
+        diagnostic_path = os.path.join(log_dir, "processing_error.log")
+        with open(diagnostic_path, "w", encoding="utf-8") as log_file:
+            log_file.write(f"Exception: {type(exc).__name__}: {exc}\\n\\n")
+            log_file.write(traceback.format_exc())
+
         await m.reply_text(
-            f"Video processing failed: {type(exc).__name__}: {exc}\n"
-            "I'll send the PaddleOCR error log if it exists."
+            f"Video processing failed: {type(exc).__name__}: {exc}\\n"
+            "I'll send the Python traceback and any OCR subprocess log."
         )
-        log_path = get_paddleocr_log_path()
-        if os.path.isfile(log_path):
-            try:
-                await m.reply_document(
-                    log_path,
-                    caption="PaddleOCR error log (paddleocr_error.log)"
-                )
-            except Exception as send_error:
-                await m.reply_text(f"Could not send the log file: {send_error}")
-        else:
-            await m.reply_text(
-                f"Log file was not found at: {log_path}\n"
-                "Please check the Railway service logs for the full error."
+
+        # This traceback log is always created by the bot's exception handler.
+        try:
+            await m.reply_document(
+                diagnostic_path,
+                caption="Processing traceback (processing_error.log)"
             )
+        except Exception as send_error:
+            await m.reply_text(f"Could not send the processing traceback: {send_error}")
+
+        # PaddleOCR and Google Lens keep their own stderr/stdout logs.
+        for engine_log_name in ("paddleocr_error.log", "google_lens_error.log"):
+            engine_log_path = os.path.join(log_dir, engine_log_name)
+            if os.path.isfile(engine_log_path):
+                try:
+                    await m.reply_document(
+                        engine_log_path,
+                        caption=f"OCR subprocess log ({engine_log_name})"
+                    )
+                except Exception as send_error:
+                    await m.reply_text(f"Could not send {engine_log_name}: {send_error}")
     finally:
         if os.path.exists(output_name):
             os.remove(output_name)
