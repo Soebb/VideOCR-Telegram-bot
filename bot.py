@@ -91,7 +91,7 @@ def get_paddleocr_log_path() -> str:
     state_home = os.environ.get("XDG_STATE_HOME")
     if not state_home:
         state_home = os.path.join(os.path.expanduser("~"), ".local", "state")
-    return os.path.join(state_home, "VideOCR", "paddleocr_error.log")
+    return os.path.join(state_home, "VideOCR", "error_log.txt")
 
 
 @Bot.on_message(filters.private & (filters.video | filters.document))
