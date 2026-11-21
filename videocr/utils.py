@@ -200,46 +200,58 @@ def find_executable(program_name: str) -> str:
 
 
 def resolve_model_dirs(lang: str, use_server_model: bool) -> tuple[str, str, str]:
-    """Resolves the model directory for the specified language and mode."""
+    """Resolve model directories from the PP-OCRv6 support bundle.
+
+    PP-OCRv6 covers Chinese, English, Japanese and supported Latin-script
+    languages. PaddleOCR 3.7 intentionally falls back to PP-OCRv5 models for
+    languages outside that set (including Persian/Arabic-script languages).
+    """
     program_dir = get_base_dir()
-    base_path = os.path.join(program_dir, "PaddleOCR.PP-OCRv5.support.files")
+    base_path = os.path.join(program_dir, "PaddleOCR.PP-OCRv6.support.files")
 
     det_path = os.path.join(base_path, "det")
     rec_path = os.path.join(base_path, "rec")
     cls_path = os.path.join(base_path, "cls", "PP-LCNet_x1_0_textline_ori")
 
-    mode = "server" if use_server_model else "mobile"
+    # PaddleOCR 3.7's PP-OCRv6 unified recognition model supports these
+    # language groups. Pali (pi) remains on the PP-OCRv5 Latin recognizer.
+    ppocrv6_langs = (PADDLEOCR_LANGS["latin"] - {"pi"}) | {
+        "ch", "chinese_cht", "japan", "en"
+    }
 
-    # DET
-    if lang == "ka":
-        det_sub = "PP-OCRv3_mobile_det"
+    if lang in ppocrv6_langs:
+        det_sub = "PP-OCRv6_medium_det"
+        rec_sub = "PP-OCRv6_medium_rec"
     else:
-        det_sub = f"PP-OCRv5_{mode}_det"
+        # Languages not covered by PP-OCRv6 use PaddleOCR 3.7's
+        # PP-OCRv5/PP-OCRv3 compatibility models.
+        if lang == "ka":
+            det_sub = "PP-OCRv3_mobile_det"
+            rec_sub = "ka_PP-OCRv3_mobile_rec"
+        else:
+            det_sub = "PP-OCRv5_server_det"
 
-    # REC
-    if lang in ("ch", "chinese_cht", "japan"):
-        rec_sub = f"PP-OCRv5_{mode}_rec"
-    elif lang in PADDLEOCR_LANGS["latin"]:
-        rec_sub = "latin_PP-OCRv5_mobile_rec"
-    elif lang in PADDLEOCR_LANGS["arabic"]:
-        rec_sub = "arabic_PP-OCRv5_mobile_rec"
-    elif lang in PADDLEOCR_LANGS["eslav"]:
-        rec_sub = "eslav_PP-OCRv5_mobile_rec"
-    elif lang in PADDLEOCR_LANGS["cyrillic"]:
-        rec_sub = "cyrillic_PP-OCRv5_mobile_rec"
-    elif lang in PADDLEOCR_LANGS["devanagari"]:
-        rec_sub = "devanagari_PP-OCRv5_mobile_rec"
-    elif lang in ("en", "korean", "th", "el", "te", "ta"):
-        rec_sub = f"{lang}_PP-OCRv5_mobile_rec"
-    elif lang == "ka":
-        rec_sub = "ka_PP-OCRv3_mobile_rec"
-    else:
-        raise ValueError(f"Unsupported language code '{lang}' for PaddleOCR model resolution.")
+            if lang in PADDLEOCR_LANGS["arabic"]:
+                rec_sub = "arabic_PP-OCRv5_mobile_rec"
+            elif lang in PADDLEOCR_LANGS["eslav"]:
+                rec_sub = "eslav_PP-OCRv5_mobile_rec"
+            elif lang in PADDLEOCR_LANGS["cyrillic"]:
+                rec_sub = "cyrillic_PP-OCRv5_mobile_rec"
+            elif lang in PADDLEOCR_LANGS["devanagari"]:
+                rec_sub = "devanagari_PP-OCRv5_mobile_rec"
+            elif lang in PADDLEOCR_LANGS["latin"]:
+                rec_sub = "latin_PP-OCRv5_mobile_rec"
+            elif lang in ("korean", "th", "el", "te", "ta"):
+                rec_sub = f"{lang}_PP-OCRv5_mobile_rec"
+            else:
+                raise ValueError(
+                    f"Unsupported language code '{lang}' for PaddleOCR model resolution."
+                )
 
     return (
         os.path.join(det_path, det_sub),
         os.path.join(rec_path, rec_sub),
-        cls_path
+        cls_path,
     )
 
 
