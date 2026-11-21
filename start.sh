@@ -19,7 +19,7 @@ export DEBIAN_FRONTEND=noninteractive
 
 echo "[setup] Installing system libraries required by PaddleOCR/OpenCV..."
 "${SUDO[@]}" apt-get update
-"${SUDO[@]}" apt-get install -y --no-install-recommends libgl1 libglib2.0-0
+"${SUDO[@]}" apt-get install -y --no-install-recommends libgl1 libglib2.0-0 libgomp1
 "${SUDO[@]}" rm -rf /var/lib/apt/lists/*
 
 echo "[setup] Installing Python requirements..."
