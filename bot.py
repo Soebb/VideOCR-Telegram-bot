@@ -105,6 +105,15 @@ async def from_tg_files(_, m):
     await msg.edit_text("Processing..")
     output_name = "out.srt"
 
+    # Remove previous-run logs so the next error report cannot contain stale data.
+    state_home = os.environ.get("XDG_STATE_HOME") or os.path.join(os.path.expanduser("~"), ".local", "state")
+    log_dir = os.path.join(state_home, "VideOCR")
+    os.makedirs(log_dir, exist_ok=True)
+    for old_log_name in ("processing_error.log", "paddleocr_error.log", "google_lens_error.log"):
+        old_log_path = os.path.join(log_dir, old_log_name)
+        if os.path.isfile(old_log_path):
+            os.remove(old_log_path)
+
     try:
         save_subtitles_to_file(vid, output_name, OCR_ENGINE, LANGUAGE)
         await m.reply_document(output_name)
