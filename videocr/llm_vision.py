@@ -11,7 +11,7 @@ import urllib.request
 from typing import Any
 
 import numpy as np
-import simplejpeg  # type: ignore
+import simplejpeg
 
 _DEBUG_ENABLED = os.environ.get("VIDEOCR_LLM_DEBUG", "") == "1"
 _LLM_LOG_PATH = os.path.join(tempfile.gettempdir(), "videocr_llm_debug.log")
