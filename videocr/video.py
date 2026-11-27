@@ -15,7 +15,7 @@ import av
 import fast_ssim
 import numpy as np
 import wordninja_enhanced as wordninja
-import simplejpeg  # type: ignore
+import simplejpeg
 
 from . import llm_vision, utils
 from .config import DetectionConfig, FrameConfig, LlmConfig, OcrConfig, PostProcessConfig, TimeRange
