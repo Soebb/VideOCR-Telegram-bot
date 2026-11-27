@@ -11,7 +11,7 @@ from typing import IO, Any
 
 import av
 import fast_ssim
-import simplejpeg  # type: ignore
+import simplejpeg
 import numpy as np
 from cpuid import cpuid, xgetbv  # type: ignore
 
