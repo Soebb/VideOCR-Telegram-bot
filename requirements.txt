@@ -3,7 +3,7 @@
 # Video processing
 av
 numpy
-simplejpeg
+https://github.com/Soebb/simplejpeg/archive/feature-type-checking.zip
 
 # OCR and text processing
 Fast-SSIM
